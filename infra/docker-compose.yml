@@ -19,6 +19,9 @@ x-api: &api
     REDIS_URL: redis://redis:6379
     JWT_SECRET: ${JWT_SECRET:-cambia-esto}
     DEMO_MODE: ${DEMO_MODE:-true}
+    # Límite de peticiones por IP y minuto. En el laboratorio es alto para poder
+    # hacer pruebas de carga; en producción se deja el valor por defecto (300).
+    RATE_LIMIT: ${RATE_LIMIT:-1000000}
   depends_on:
     db-primary: { condition: service_healthy }
     redis: { condition: service_healthy }
