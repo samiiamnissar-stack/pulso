@@ -7,7 +7,7 @@
 #                                         Redis (caché + tiempo real)
 #
 # Arranque:  docker compose up -d --build
-# Datos:     docker compose exec api-1 node src/seed.js
+# Datos:     en modo demo se cargan solos; para reiniciarlos: docker compose exec api-1 node src/seed.js
 # App:       http://localhost:8080
 
 x-api: &api
@@ -39,10 +39,10 @@ services:
     environment: { <<: *api-env, NODE_NAME: api-1 }
   api-2:
     <<: *api
-    environment: { <<: *api-env, NODE_NAME: api-2, RUN_MIGRATIONS: "false" }
+    environment: { <<: *api-env, NODE_NAME: api-2 }
   api-3:
     <<: *api
-    environment: { <<: *api-env, NODE_NAME: api-3, RUN_MIGRATIONS: "false" }
+    environment: { <<: *api-env, NODE_NAME: api-3 }
 
   db-primary:
     image: postgres:16-alpine

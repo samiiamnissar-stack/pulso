@@ -76,8 +76,8 @@ Para simular varios nodos sin Docker hay un balanceador sencillo en `server/tool
 
 ```bash
 PORT=3001 NODE_NAME=api-1 npm start
-PORT=3002 NODE_NAME=api-2 RUN_MIGRATIONS=false npm start
-PORT=3003 NODE_NAME=api-3 RUN_MIGRATIONS=false npm start
+PORT=3002 NODE_NAME=api-2 npm start
+PORT=3003 NODE_NAME=api-3 npm start
 npm run lb                        # http://localhost:8080, reparte entre los tres
 ```
 
