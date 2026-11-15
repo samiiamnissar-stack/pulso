@@ -14,6 +14,14 @@ async function main() {
     try { await migrate(); } finally { await db.query('SELECT pg_advisory_unlock(424242)'); }
   }
 
+  // En modo demo (por ejemplo, la demo pública) se cargan datos de ejemplo
+  // si la base de datos está vacía y se mantienen vivos los check-ins.
+  if (config.demoMode && process.env.AUTO_SEED !== 'false') {
+    const { ensureDemoData, refreshDemo } = require('./seed');
+    await ensureDemoData();
+    setInterval(() => refreshDemo().catch((err) => console.error('[demo]', err.message)), 15 * 60 * 1000).unref();
+  }
+
   const server = http.createServer(createApp());
   realtime.attach(server);
   server.listen(config.port, () => {

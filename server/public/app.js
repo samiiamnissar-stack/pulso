@@ -227,6 +227,7 @@ function viewAuth() {
   render(
     h('div', { class: 'top' }, h('div', { class: 'brand' }, h('span', { class: 'brand-dot' }), 'Pulso')),
     h('p', { class: 'subtitle' }, 'Antes de salir, mira qué ambiente hay en cada local. Sin exponer a nadie.'),
+    state.config.demoMode ? h('div', { class: 'banner' }, 'Versión de demostración con locales y personas inventados. No pongas aquí datos reales: entra con la cuenta de prueba.') : null,
     seg, holder,
   );
 }

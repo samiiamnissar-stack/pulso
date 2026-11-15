@@ -1,0 +1,46 @@
+# Despliegue gratuito en Render (https://render.com) a partir de este repositorio.
+# Crea la API (que también sirve la app), una base de datos PostgreSQL y un Redis.
+# Limitaciones del plan gratuito: la web se duerme tras 15 min sin visitas y
+# tarda ~1 min en despertar, y la base de datos gratuita caduca a los 30 días.
+services:
+  - type: web
+    name: pulso
+    runtime: node
+    plan: free
+    region: frankfurt
+    rootDir: server
+    buildCommand: npm ci --omit=dev
+    startCommand: node src/index.js
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NODE_NAME
+        value: render-1
+      - key: DEMO_MODE
+        value: "true"
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: pulso-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: pulso-cache
+          property: connectionString
+
+  - type: keyvalue
+    name: pulso-cache
+    plan: free
+    region: frankfurt
+    maxmemoryPolicy: allkeys-lru
+    ipAllowList: []
+
+databases:
+  - name: pulso-db
+    plan: free
+    region: frankfurt
+    databaseName: pulso
+    user: pulso

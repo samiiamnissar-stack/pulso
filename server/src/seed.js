@@ -121,6 +121,27 @@ async function seedAll() {
   return { venues: VENUES.length, users: n + 1 };
 }
 
+// En la demo pública los check-ins de los usuarios de ejemplo se renuevan
+// solos, para que siempre haya ambiente que enseñar.
+async function refreshDemo() {
+  const { rowCount } = await db.query(
+    `UPDATE checkins SET ended_at = NULL,
+            expires_at = now() + make_interval(mins => 120 + (id % 120)::int)
+     WHERE user_id IN (SELECT id FROM users WHERE email LIKE '%@ejemplo.pulso')`,
+  );
+  await invalidate('stats:all');
+  return rowCount;
+}
+
+async function ensureDemoData() {
+  const { rows } = await db.query('SELECT count(*)::int AS n FROM venues');
+  if (rows[0].n === 0) {
+    const r = await seedAll();
+    console.log(`[demo] datos de ejemplo cargados: ${r.venues} locales y ${r.users} usuarios`);
+  }
+  await refreshDemo();
+}
+
 if (require.main === module) {
   seedAll()
     .then((r) => { console.log(`Datos de ejemplo cargados: ${r.venues} locales y ${r.users} usuarios`); })
@@ -128,4 +149,4 @@ if (require.main === module) {
     .finally(async () => { await db.close(); redis.disconnect(); });
 }
 
-module.exports = { seedAll, VENUES };
+module.exports = { seedAll, refreshDemo, ensureDemoData, VENUES };

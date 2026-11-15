@@ -1,6 +1,6 @@
 -- Esquema de Pulso. Se aplica con `npm run migrate` y es idempotente.
 
-CREATE EXTENSION IF NOT EXISTS pgcrypto;
+-- gen_random_uuid() viene incluido en PostgreSQL 13 o superior
 
 CREATE TABLE IF NOT EXISTS users (
   id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),

@@ -53,6 +53,14 @@ Abre http://localhost:8080 y entra con **demo@pulso.app / pulso1234**.
 
 El laboratorio arranca en **modo demo** (`DEMO_MODE=true`), que permite hacer check-in sin estar físicamente en el local. Para producción hay que ponerlo a `false` y cambiar `JWT_SECRET` y las contraseñas (variables en un fichero `.env` junto al `docker-compose.yml`).
 
+### Demo pública gratuita (Render)
+
+El fichero [`render.yaml`](render.yaml) despliega la app, PostgreSQL y Redis en el plan gratuito de Render con un clic:
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/samiiamnissar-stack/pulso)
+
+La demo arranca en modo demostración: carga locales y usuarios de ejemplo si la base de datos está vacía y renueva sus check-ins cada 15 minutos para que siempre haya ambiente. En el plan gratuito la web se duerme tras 15 minutos sin visitas (la primera carga tarda alrededor de un minuto) y la base de datos gratuita caduca a los 30 días.
+
 ### Sin Docker
 
 Necesitas Node.js 20 o superior, PostgreSQL y Redis en local.
