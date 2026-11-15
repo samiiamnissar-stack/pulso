@@ -1,0 +1,131 @@
+# Pulso · el ambiente de la noche
+
+Pulso es una app móvil (PWA) para saber **qué ambiente hay esta noche en cada discoteca** antes de salir: afluencia, edad media y reparto aproximado del público por orientación y por género. Así cada persona puede elegir a dónde ir según lo que busca, ya sea un sitio LGTBI+, uno mixto o uno mayoritariamente hetero.
+
+También permite hacer check-in en un local, dejarse ver (si quieres) por la gente que está allí, darse «me gusta», hacer match y chatear en tiempo real.
+
+Es el proyecto práctico de **dimensionado de servidores y red** de 2.º ASIR: la app es real y la memoria calcula la infraestructura que haría falta para darle servicio en toda España.
+
+<p align="center">
+  <img src="docs/img/02-home.png" width="210" alt="Lista de locales">
+  <img src="docs/img/04-local.png" width="210" alt="Detalle de un local">
+  <img src="docs/img/05-personas.png" width="210" alt="Personas visibles">
+  <img src="docs/img/06-chat.png" width="210" alt="Chat">
+</p>
+
+## Privacidad primero
+
+La orientación sexual es un dato especialmente protegido (art. 9 RGPD), y una app que dijera «en este local están estas personas y son gais» podría poner a alguien en peligro. Por eso:
+
+- **El ambiente es agregado y anónimo.** Con menos de 10 personas en un local no se enseña ningún desglose (k-anonimato). Los grupos de menos de 3 se suman en «Otras» y los porcentajes van de 5 en 5.
+- **Nadie es visible por defecto.** Quien lo activa solo es visto por la gente que está en el mismo local, y su orientación sigue oculta salvo que también lo active.
+- **No se guardan coordenadas.** La ubicación solo se usa para comprobar que estás en el local al hacer check-in. El check-in caduca a las 4 horas.
+- **Solo mayores de 18**, con consentimiento expreso. Desde el perfil se pueden descargar todos los datos o borrar la cuenta.
+
+## Arquitectura
+
+```
+móvil (PWA) ──► balanceador ──► API Node.js ×N (sin estado) ──► Redis (caché + tiempo real)
+                                     │
+                                     ├──► PostgreSQL primario (escrituras)
+                                     └──► PostgreSQL réplica (lecturas)
+```
+
+| Parte | Tecnología |
+|---|---|
+| App | PWA en HTML, CSS y JavaScript, sin frameworks; service worker para abrir sin cobertura |
+| API | Node.js 22, Express, JWT, bcrypt, helmet, límites de peticiones |
+| Tiempo real | Socket.IO con adaptador de Redis (funciona con varios nodos) |
+| Datos | PostgreSQL 16 con réplica en streaming y Redis 7 |
+| Laboratorio | Docker Compose: nginx + 3 nodos API + Postgres primario/réplica + Redis, en tres redes separadas |
+
+## Puesta en marcha
+
+### Con Docker (recomendado)
+
+```bash
+cd infra
+docker compose up -d --build
+docker compose exec api-1 node src/seed.js   # carga locales y usuarios de prueba
+```
+
+Abre http://localhost:8080 y entra con **demo@pulso.app / pulso1234**.
+
+El laboratorio arranca en **modo demo** (`DEMO_MODE=true`), que permite hacer check-in sin estar físicamente en el local. Para producción hay que ponerlo a `false` y cambiar `JWT_SECRET` y las contraseñas (variables en un fichero `.env` junto al `docker-compose.yml`).
+
+### Sin Docker
+
+Necesitas Node.js 20 o superior, PostgreSQL y Redis en local.
+
+```bash
+cd server
+npm install
+npm run seed
+DEMO_MODE=true npm start          # http://localhost:3000
+```
+
+Para simular varios nodos sin Docker hay un balanceador sencillo en `server/tools/balancer.js`:
+
+```bash
+PORT=3001 NODE_NAME=api-1 npm start
+PORT=3002 NODE_NAME=api-2 RUN_MIGRATIONS=false npm start
+PORT=3003 NODE_NAME=api-3 RUN_MIGRATIONS=false npm start
+npm run lb                        # http://localhost:8080, reparte entre los tres
+```
+
+## Pruebas
+
+```bash
+cd server
+npm test                                   # reglas de privacidad (unitarias)
+API_URL=http://localhost:8080 npm run smoke   # 17 comprobaciones de extremo a extremo
+```
+
+### Prueba de carga
+
+```bash
+API_URL=http://localhost:8080 CONNECTIONS=100 DURATION=30 node loadtest/run.js
+```
+
+Arranca los nodos con `RATE_LIMIT` alto (por ejemplo `RATE_LIMIT=10000000`), porque si no el límite por IP corta la prueba. Los resultados que aparecen en la memoria están en `loadtest/resultados/`:
+
+| Prueba | pet/s | p99 | Errores |
+|---|---|---|---|
+| 1 nodo (≈1 vCPU) | 2.792 | 50 ms | 0 |
+| 3 nodos detrás del balanceador (misma máquina de 2 vCPU) | 2.348 | 138 ms | 0 |
+| 3 nodos y se mata uno a mitad de la prueba | 2.338 | 73 ms | 0 |
+
+## Documentación
+
+- [`docs/Memoria_Dimensionado_Pulso.docx`](docs/Memoria_Dimensionado_Pulso.docx): memoria completa (T1 a T7)
+- [`docs/calculos.py`](docs/calculos.py): todos los cálculos de la memoria, para rehacerlos si cambia una hipótesis
+- [`docs/img/esquema-red.svg`](docs/img/esquema-red.svg): esquema de red
+- [`docs/API.md`](docs/API.md): referencia de la API
+- [Presentación para la exposición (Canva)](https://canva.link/8b9dw01vp4hucux)
+
+### Cifras principales (escenario esperado)
+
+| | |
+|---|---|
+| Población de 18 a 30 años (INE, 1/1/2025) | 7.026.611 |
+| Usuarios activos al mes (30 % de penetración) | 2.086.903 |
+| Usuarios activos al día | 730.416 |
+| Conectados a la vez en hora punta (23:00) | 43.825 |
+| Peticiones por segundo en el pico | 13.147 |
+| Nodos API / tiempo real | 14 (13+1) / 6 (5+1) |
+| Enlaces | 2 operadores × 10 Gbps |
+
+## Estructura
+
+```
+server/     API y app (public/)
+infra/      docker-compose, nginx y scripts de replicación de PostgreSQL
+loadtest/   prueba de carga y resultados
+docs/       memoria, cálculos, esquema de red y capturas
+```
+
+---
+
+Los locales y los usuarios de prueba son inventados.
+
+Hecho por **Samia El Yahyaoui Mnissar** · 2.º ASIR

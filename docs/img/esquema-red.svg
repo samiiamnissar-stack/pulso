@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1060" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#334155"/></marker>
+    <style>
+      .box{fill:#fff;stroke:#334155;stroke-width:1.6;rx:10}
+      .t{font-size:15px;font-weight:700;fill:#0f172a}
+      .s{font-size:12.5px;fill:#475569}
+      .zone{fill:none;stroke-width:2;stroke-dasharray:7 5;rx:18}
+      .zl{font-size:14px;font-weight:700}
+      .l{stroke:#334155;stroke-width:2.2;fill:none}
+      .l10{stroke:#0f766e;stroke-width:4;fill:none}
+      .rep{stroke:#b45309;stroke-width:2.4;fill:none;stroke-dasharray:8 6}
+      .lab{font-size:12px;fill:#0f766e;font-weight:700}
+      .ha{fill:#dc2626;font-size:11px;font-weight:800;fill:#fff}
+    </style>
+  </defs>
+  <rect width="1600" height="1060" fill="#f8fafc"/>
+  <text x="40" y="44" font-size="26" font-weight="800" fill="#0f172a">Pulso · esquema de red (escenario esperado)</text>
+  <text x="40" y="70" font-size="14" fill="#475569">Del móvil a los datos. Región principal en la UE con 3 zonas de disponibilidad y región secundaria para recuperación.</text>
+
+  <!-- Usuarios -->
+  <rect class="box" x="40" y="110" width="200" height="74"/>
+  <text class="t" x="58" y="140">Usuarios (PWA)</text><text class="s" x="58" y="162">móvil 4G/5G y wifi · 43.825</text><text class="s" x="58" y="177">conectados en hora punta</text>
+
+  <!-- DNS y CDN -->
+  <rect class="box" x="300" y="100" width="200" height="56"/><text class="t" x="318" y="126">DNS gestionado</text><text class="s" x="318" y="145">anycast · resuelve a la IP virtual</text>
+  <rect class="box" x="300" y="170" width="200" height="56"/><text class="t" x="318" y="196">CDN</text><text class="s" x="318" y="215">PWA y fotos en caché</text>
+  <path class="l" d="M240 140 H300" marker-end="url(#a)"/>
+  <path class="l" d="M240 165 H270 V198 H300" marker-end="url(#a)"/>
+
+  <!-- Operadores -->
+  <rect class="box" x="560" y="96" width="170" height="56"/><text class="t" x="578" y="122">Operador A</text><text class="s" x="578" y="141">tránsito 10 Gbps</text>
+  <rect class="box" x="560" y="176" width="170" height="56"/><text class="t" x="578" y="202">Operador B</text><text class="s" x="578" y="221">tránsito 10 Gbps</text>
+  <path class="l" d="M500 128 H530 V124 H560" marker-end="url(#a)"/>
+  <path class="l" d="M500 128 H530 V204 H560" marker-end="url(#a)"/>
+
+  <!-- Región principal -->
+  <rect class="zone" x="770" y="86" width="800" height="830" stroke="#0f766e"/>
+  <text class="zl" x="790" y="112" fill="#0f766e">REGIÓN PRINCIPAL (UE) · 3 zonas de disponibilidad</text>
+
+  <!-- Borde -->
+  <rect class="box" x="800" y="130" width="230" height="62"/><text class="t" x="818" y="156">Routers de borde ×2</text><text class="s" x="818" y="176">BGP con los dos operadores</text>
+  <rect class="box" x="1060" y="130" width="230" height="62"/><text class="t" x="1078" y="156">Anti-DDoS + WAF</text><text class="s" x="1078" y="176">filtra antes de entrar</text>
+  <rect class="box" x="1320" y="130" width="230" height="62"/><text class="t" x="1338" y="156">Cortafuegos ×2 (HA)</text><text class="s" x="1338" y="176">activo/pasivo · VRRP</text>
+  <path class="l10" d="M730 124 H765 V150 H800" marker-end="url(#a)"/>
+  <path class="l10" d="M730 204 H765 V172 H800" marker-end="url(#a)"/>
+  <path class="l10" d="M1030 161 H1060" marker-end="url(#a)"/>
+  <path class="l10" d="M1290 161 H1320" marker-end="url(#a)"/>
+  <text class="lab" x="580" y="254">2 × 10 Gbps al borde</text>
+
+  <!-- DMZ -->
+  <rect class="zone" x="790" y="222" width="760" height="96" stroke="#7c3aed"/>
+  <text class="zl" x="806" y="244" fill="#7c3aed">VLAN 70 · DMZ 10.10.70.0/24</text>
+  <rect class="box" x="1000" y="252" width="250" height="56"/><text class="t" x="1018" y="276">Balanceadores L7 ×2</text><text class="s" x="1018" y="295">activo-activo · IP virtual · TLS</text>
+  <path class="l10" d="M1435 192 V280 H1250" marker-end="url(#a)"/>
+
+  <!-- Núcleo -->
+  <rect class="box" x="1000" y="342" width="250" height="56" style="fill:#ecfeff"/><text class="t" x="1018" y="366">Switches de núcleo ×2</text><text class="s" x="1018" y="385">MLAG · 25 Gbps entre ellos</text>
+  <path class="l10" d="M1125 308 V342" marker-end="url(#a)"/>
+
+  <!-- Capa web/API -->
+  <rect class="zone" x="790" y="420" width="370" height="150" stroke="#0369a1"/>
+  <text class="zl" x="806" y="442" fill="#0369a1">VLAN 20 · Web/API 10.10.20.0/24</text>
+  <rect class="box" x="810" y="456" width="330" height="96"/><text class="t" x="828" y="482">14 nodos API (13 + 1 de reserva)</text><text class="s" x="828" y="502">16 vCPU · 32 GB · repartidos en 3 zonas</text><text class="s" x="828" y="520">13.147 pet/s · autoescalado hasta 35</text><text class="s" x="828" y="538">para el pico de los sábados</text>
+
+  <rect class="zone" x="1180" y="420" width="370" height="150" stroke="#0369a1"/>
+  <text class="zl" x="1196" y="442" fill="#0369a1">VLAN 30 · Tiempo real 10.10.30.0/24</text>
+  <rect class="box" x="1200" y="456" width="330" height="96"/><text class="t" x="1218" y="482">6 nodos WebSocket (5 + 1)</text><text class="s" x="1218" y="502">8 vCPU · 16 GB</text><text class="s" x="1218" y="520">chat, matches y avisos de ambiente</text><text class="s" x="1218" y="538">10.000 conexiones por nodo</text>
+  <path class="l10" d="M1060 398 V410 H1100 V456" marker-end="url(#a)"/>
+  <path class="l10" d="M1190 398 V410 H1480 V456" marker-end="url(#a)"/>
+
+  <!-- Datos -->
+  <rect class="zone" x="790" y="596" width="760" height="200" stroke="#b91c1c"/>
+  <text class="zl" x="1310" y="752" fill="#b91c1c">VLAN 40 BD · VLAN 50 caché</text><text class="s" x="1310" y="772">10.10.40.0/24 · 10.10.50.0/24</text><text class="s" x="1310" y="788">sin acceso desde Internet</text>
+  <rect class="box" x="810" y="634" width="230" height="74"/><text class="t" x="828" y="660">Redis ×3</text><text class="s" x="828" y="680">caché del ambiente (30 s)</text><text class="s" x="828" y="696">y pub/sub del tiempo real</text>
+  <rect class="box" x="1060" y="634" width="230" height="74"/><text class="t" x="1078" y="660">PostgreSQL primario</text><text class="s" x="1078" y="680">16 vCPU · 64 GB · NVMe</text><text class="s" x="1078" y="696">+ standby síncrono (otra zona)</text>
+  <rect class="box" x="1310" y="634" width="220" height="74"/><text class="t" x="1328" y="660">Réplicas de lectura ×2</text><text class="s" x="1328" y="680">listas de locales y</text><text class="s" x="1328" y="696">perfiles visibles</text>
+  <rect class="box" x="1060" y="722" width="230" height="56"/><text class="t" x="1078" y="746">Almacenamiento de objetos</text><text class="s" x="1078" y="765">fotos opcionales · origen de la CDN</text>
+  <path class="l10" d="M975 552 V634" marker-end="url(#a)"/>
+  <path class="l10" d="M1100 552 V634" marker-end="url(#a)"/>
+  <path class="l10" d="M1365 552 V600 H1420 V634" marker-end="url(#a)"/>
+  <path class="rep" d="M1290 671 H1310" marker-end="url(#a)"/>
+  
+
+  <!-- Gestión -->
+  <rect class="zone" x="790" y="814" width="760" height="86" stroke="#475569"/>
+  <text class="zl" x="806" y="836" fill="#475569">VLAN 10 gestión · 60 copias · 80 monitorización · 90 DNS/NTP internos</text>
+  <rect class="box" x="810" y="846" width="230" height="44"/><text class="t" x="828" y="874">VPN + MFA (bastión)</text>
+  <rect class="box" x="1060" y="846" width="230" height="44"/><text class="t" x="1078" y="874">Monitorización ×2</text>
+  <rect class="box" x="1310" y="846" width="220" height="44"/><text class="t" x="1328" y="874">Copias cifradas</text>
+
+  <!-- Región secundaria -->
+  <rect class="zone" x="40" y="600" width="660" height="312" stroke="#b45309"/>
+  <text class="zl" x="60" y="626" fill="#b45309">REGIÓN SECUNDARIA (UE) · recuperación ante desastre</text>
+  <rect class="box" x="60" y="646" width="290" height="70"/><text class="t" x="78" y="672">Réplica asíncrona de PostgreSQL</text><text class="s" x="78" y="692">RPO ≤ 5 min</text>
+  <rect class="box" x="60" y="740" width="620" height="66"/><text class="t" x="78" y="766">Copias y objetos replicados</text><text class="s" x="78" y="786">restauración probada cada trimestre</text>
+  <rect class="box" x="60" y="824" width="620" height="70"/><text class="t" x="78" y="850">Infraestructura como código lista para levantar</text><text class="s" x="78" y="870">balanceadores, API y tiempo real se crean en minutos · RTO ≤ 60 min</text>
+  <path class="rep" d="M1060 700 H1050 V720 H700 V690 H350" marker-end="url(#a)"/>
+  <text x="720" y="740" font-size="12" font-weight="700" fill="#b45309">VPN IPsec / enlace privado cifrado</text>
+
+  <!-- Leyenda -->
+  <rect x="40" y="930" width="1530" height="100" rx="14" fill="#fff" stroke="#cbd5e1"/>
+  <text x="60" y="958" font-size="15" font-weight="800" fill="#0f172a">Leyenda</text>
+  <path class="l10" d="M60 984 H120"/><text class="s" x="130" y="988">enlace de 10 Gbps (o superior en el núcleo)</text>
+  <path class="rep" d="M440 984 H500"/><text class="s" x="510" y="988">replicación de datos</text>
+  <path class="l" d="M700 984 H760" marker-end="url(#a)"/><text class="s" x="770" y="988">flujo de peticiones</text>
+  <rect x="960" y="974" width="22" height="18" rx="4" fill="none" stroke="#0f766e" stroke-width="2" stroke-dasharray="5 4"/><text class="s" x="990" y="988">zona / VLAN</text>
+  <text class="s" x="60" y="1016">Redundancia: 2 operadores · 2 routers · 2 cortafuegos · 2 balanceadores · 2 switches de núcleo · N+1 en API y tiempo real · Redis ×3 · BD con standby síncrono y 2 réplicas · región secundaria.</text>
+</svg>

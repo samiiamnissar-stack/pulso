@@ -1,0 +1,15 @@
+{
+  "api": "http://localhost:3001",
+  "connections": 50,
+  "duration": 20,
+  "peticiones/s (media)": 2792,
+  "peticiones/s (máx.)": 3620,
+  "latencia media (ms)": 17.43,
+  "latencia p50 (ms)": 15,
+  "latencia p99 (ms)": 50,
+  "peticiones totales": 55829,
+  "respuestas no 2xx": 0,
+  "errores de conexión": 0,
+  "KB/s recibidos (media)": 12609,
+  "tamaño medio respuesta (KB)": 4.5
+}

@@ -1,0 +1,15 @@
+{
+  "api": "http://localhost:8080",
+  "connections": 50,
+  "duration": 20,
+  "peticiones/s (media)": 2338,
+  "peticiones/s (máx.)": 3050,
+  "latencia media (ms)": 20.92,
+  "latencia p50 (ms)": 17,
+  "latencia p99 (ms)": 73,
+  "peticiones totales": 46745,
+  "respuestas no 2xx": 0,
+  "errores de conexión": 0,
+  "KB/s recibidos (media)": 10564,
+  "tamaño medio respuesta (KB)": 4.5
+}

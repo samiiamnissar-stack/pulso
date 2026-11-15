@@ -1,0 +1,100 @@
+# Laboratorio de Pulso: reproduce a pequeña escala la arquitectura de la memoria.
+#
+#   móvil ──► nginx (balanceador) ──► api-1 / api-2 / api-3 (N+1)
+#                                         │        │
+#                                         ▼        ▼
+#                              Postgres primario ─► réplica de lectura
+#                                         Redis (caché + tiempo real)
+#
+# Arranque:  docker compose up -d --build
+# Datos:     docker compose exec api-1 node src/seed.js
+# App:       http://localhost:8080
+
+x-api: &api
+  build: ../server
+  restart: unless-stopped
+  environment: &api-env
+    DATABASE_URL: postgres://pulso:${POSTGRES_PASSWORD:-pulso}@db-primary:5432/pulso
+    DATABASE_READ_URL: postgres://pulso:${POSTGRES_PASSWORD:-pulso}@db-replica:5432/pulso
+    REDIS_URL: redis://redis:6379
+    JWT_SECRET: ${JWT_SECRET:-cambia-esto}
+    DEMO_MODE: ${DEMO_MODE:-true}
+  depends_on:
+    db-primary: { condition: service_healthy }
+    redis: { condition: service_healthy }
+  networks: [app, datos]
+
+services:
+  lb:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports: ["8080:80"]
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on: [api-1, api-2, api-3]
+    networks: [dmz, app]
+
+  api-1:
+    <<: *api
+    environment: { <<: *api-env, NODE_NAME: api-1 }
+  api-2:
+    <<: *api
+    environment: { <<: *api-env, NODE_NAME: api-2, RUN_MIGRATIONS: "false" }
+  api-3:
+    <<: *api
+    environment: { <<: *api-env, NODE_NAME: api-3, RUN_MIGRATIONS: "false" }
+
+  db-primary:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: pulso
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pulso}
+      POSTGRES_DB: pulso
+      REPLICATION_PASSWORD: ${REPLICATION_PASSWORD:-replica}
+    command: >
+      postgres -c wal_level=replica -c max_wal_senders=5 -c hot_standby=on
+    volumes:
+      - pg-primary:/var/lib/postgresql/data
+      - ./postgres/primary-init.sh:/docker-entrypoint-initdb.d/10-replication.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pulso -d pulso"]
+      interval: 5s
+      retries: 10
+    networks: [datos]
+
+  db-replica:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      PGPASSWORD: ${REPLICATION_PASSWORD:-replica}
+    entrypoint: ["/bin/sh", "/replica-entrypoint.sh"]
+    volumes:
+      - pg-replica:/var/lib/postgresql/data
+      - ./postgres/replica-entrypoint.sh:/replica-entrypoint.sh:ro
+    depends_on:
+      db-primary: { condition: service_healthy }
+    networks: [datos]
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "256mb", "--maxmemory-policy", "allkeys-lru"]
+    volumes: [redis-data:/data]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      retries: 10
+    networks: [datos]
+
+# Tres redes separadas, igual que las VLAN de la memoria:
+# la base de datos no es accesible desde el balanceador.
+networks:
+  dmz: {}
+  app: {}
+  datos: { internal: true }
+
+volumes:
+  pg-primary: {}
+  pg-replica: {}
+  redis-data: {}

@@ -1,0 +1,32 @@
+{
+  "name": "pulso-api",
+  "version": "1.0.0",
+  "description": "API de Pulso: ambiente en tiempo real de las discotecas, check-in, emparejamientos y chat",
+  "main": "src/index.js",
+  "private": true,
+  "scripts": {
+    "start": "node src/index.js",
+    "migrate": "node src/migrate.js",
+    "seed": "node src/seed.js",
+    "lb": "node tools/balancer.js",
+    "loadtest": "node ../loadtest/run.js",
+    "test": "node --test test/*.test.js",
+    "smoke": "node test/smoke.js"
+  },
+  "engines": { "node": ">=20" },
+  "dependencies": {
+    "@socket.io/redis-adapter": "^8.3.0",
+    "bcryptjs": "^3.0.3",
+    "compression": "^1.8.2",
+    "express": "^4.22.3",
+    "express-rate-limit": "^8.7.4",
+    "helmet": "^8.3.0",
+    "ioredis": "^6.0.0",
+    "jsonwebtoken": "^9.0.3",
+    "pg": "^8.23.1",
+    "socket.io": "^4.8.4"
+  },
+  "devDependencies": {
+    "autocannon": "^9.0.0"
+  }
+}

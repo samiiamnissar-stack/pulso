@@ -1,0 +1,6 @@
+node_modules/
+*.log
+.env
+docs/*.pdf
+docs/__pycache__/
+dump.rdb
