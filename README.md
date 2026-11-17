@@ -1,6 +1,6 @@
 # Pulso · el ambiente de la noche
 
-Pulso es una app móvil (PWA) para saber **qué ambiente hay esta noche en cada discoteca** antes de salir: afluencia, edad media y reparto aproximado del público por género (mujeres, hombres y personas no binarias). Así cada persona puede elegir a dónde ir según el ambiente que busca: más mujeres, mixto o más hombres.
+Pulso es una app móvil (PWA) para saber **qué ambiente hay esta noche en cada discoteca** antes de salir: afluencia, edad media y reparto aproximado del público por orientación y por género. Así cada persona puede elegir a dónde ir según lo que busca, ya sea un sitio LGTBI+, uno mixto o uno mayoritariamente hetero.
 
 También permite hacer check-in en un local, dejarse ver (si quieres) por la gente que está allí, darse «me gusta», hacer match y chatear en tiempo real.
 
@@ -17,12 +17,12 @@ Es el proyecto práctico de **dimensionado de servidores y red** de 2.º ASIR: l
 
 ## Privacidad primero
 
-El ambiente se calcula solo con el género: la app no pide ni guarda la orientación sexual ni ningún otro dato especialmente protegido (art. 9 RGPD). Además:
+La orientación sexual es un dato especialmente protegido (art. 9 RGPD), y una app que dijera «en este local están estas personas y son gais» podría poner a alguien en peligro. Por eso:
 
 - **El ambiente es agregado y anónimo.** Con menos de 10 personas en un local no se enseña ningún desglose (k-anonimato). Los grupos de menos de 3 se suman en «Otras» y los porcentajes van de 5 en 5.
-- **Nadie es visible por defecto.** Quien lo activa solo es visto por la gente que está en el mismo local, y solo se ve su alias, edad, género y bio.
+- **Nadie es visible por defecto.** Quien lo activa solo es visto por la gente que está en el mismo local, y su orientación sigue oculta salvo que también lo active.
 - **No se guardan coordenadas.** La ubicación solo se usa para comprobar que estás en el local al hacer check-in. El check-in caduca a las 4 horas.
-- **Solo mayores de 18** y datos mínimos (alias, fecha de nacimiento y género). Desde el perfil se pueden descargar todos los datos o borrar la cuenta.
+- **Solo mayores de 18**, con consentimiento expreso. Desde el perfil se pueden descargar todos los datos o borrar la cuenta.
 
 ## Arquitectura
 

@@ -433,7 +433,7 @@ const t7 = [
   B('**La app.** Pulso enseña el ambiente de cada local (mujeres, hombres y personas no binarias) de forma anónima. Demostración en directo con la cuenta de prueba.'),
   B(`**Los números.** ${n(D.pob_18_30)} personas de 18 a 30 años → ${n(D.mau)} usuarios al mes → ${n(D.dau)} al día → ${n(D.conc_pico)} a la vez a las 23:00 → ${n(D.rps)} peticiones por segundo.`),
   B(`**Los servidores.** ${D.nodos_api_total} servidores API, ${D.nodos_rt} de chat, base de datos con copia en espera y 2 réplicas, Redis ×3, todo con uno de reserva.`),
-  B('**La red en Packet Tracer.** Dos operadores, todo duplicado, VLAN por función y cortafuegos. En directo: la web abre, el ping a la base de datos se bloquea y, al apagar un operador, todo sigue funcionando.'),
+  B('**La red en Packet Tracer.** Se lee de izquierda a derecha, como viaja una petición: los usuarios salen a Internet por dos operadores, entran por dos routers de borde y dos cortafuegos, y llegan a los dos switches de núcleo. De ahí se reparten a cuatro zonas separadas por VLAN (balanceadores, aplicación, datos y gestión), cada una conectada a los dos núcleos. Todo está duplicado, así que si cae una pieza el tráfico sigue por la otra.'),
   B('**La prueba de carga.** Se apaga un servidor durante la prueba y no hay errores.'),
   B('**Privacidad.** Ambiente solo por género, sin desglose con menos de 10 personas, visibilidad opcional, sin ubicación guardada y solo mayores de 18.'),
   PB(),
