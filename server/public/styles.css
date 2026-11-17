@@ -55,9 +55,9 @@ h2 { font-size: 1.1rem; margin: 22px 0 10px; }
 .venue-meta { color: var(--muted); font-size: .85rem; }
 .venue-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 10px; }
 .vibe { font-size: .78rem; font-weight: 700; padding: 3px 10px; border-radius: 999px; text-transform: uppercase; letter-spacing: .04em; }
-.vibe-lgtbi { background: linear-gradient(90deg, #ff3d8b, #ffb547, #3ddc97, #2de2e6, #8b5cf6); color: #0b0a12; }
+.vibe-mujeres { background: rgba(255, 181, 71, .18); color: var(--amber); }
 .vibe-mixto { background: rgba(139, 92, 246, .2); color: #c4b5fd; }
-.vibe-hetero { background: rgba(45, 226, 230, .15); color: var(--cyan); }
+.vibe-hombres { background: rgba(45, 226, 230, .15); color: var(--cyan); }
 .vibe-none { background: var(--bg-2); color: var(--muted); }
 .crowd { font-size: .85rem; color: var(--muted); display: flex; align-items: center; gap: 6px; }
 .crowd i { display: inline-block; width: 6px; height: 14px; border-radius: 2px; background: var(--line); }
@@ -68,10 +68,6 @@ h2 { font-size: 1.1rem; margin: 22px 0 10px; }
 .stack span { display: block; height: 100%; }
 .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 8px; font-size: .82rem; color: var(--muted); }
 .legend b { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 5px; }
-.c-hetero { background: var(--cyan); }
-.c-gay { background: var(--pink); }
-.c-lesbiana { background: var(--amber); }
-.c-bisexual { background: var(--violet); }
 .c-otras { background: var(--green); }
 .c-mujer { background: var(--amber); }
 .c-hombre { background: var(--cyan); }

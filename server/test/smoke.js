@@ -21,18 +21,18 @@ async function main() {
 
   // Menores fuera
   const teen = await call('POST', '/api/auth/register', {
-    email: `teen${stamp}@prueba.es`, password: '12345678', alias: 'Peque', birthdate: '2010-01-01', gender: 'mujer', orientation: 'hetero', consent: true,
+    email: `teen${stamp}@prueba.es`, password: '12345678', alias: 'Peque', birthdate: '2010-01-01', gender: 'mujer', consent: true,
   });
   assert.equal(teen.status, 403); ok('un menor de 18 no puede registrarse');
 
-  // Sin consentimiento expreso, no
+  // Sin aceptar la política de privacidad, no
   const noConsent = await call('POST', '/api/auth/register', {
-    email: `nc${stamp}@prueba.es`, password: '12345678', alias: 'Sin', birthdate: '2000-01-01', gender: 'hombre', orientation: 'gay',
+    email: `nc${stamp}@prueba.es`, password: '12345678', alias: 'Sin', birthdate: '2000-01-01', gender: 'hombre',
   });
-  assert.equal(noConsent.status, 400); ok('sin consentimiento expreso no hay registro');
+  assert.equal(noConsent.status, 400); ok('sin aceptar la privacidad no hay registro');
 
   const reg = await call('POST', '/api/auth/register', {
-    email: `alex${stamp}@prueba.es`, password: '12345678', alias: 'Alex', birthdate: '2000-03-10', gender: 'hombre', orientation: 'gay', consent: true,
+    email: `alex${stamp}@prueba.es`, password: '12345678', alias: 'Alex', birthdate: '2000-03-10', gender: 'hombre', consent: true,
   });
   assert.equal(reg.status, 201); ok('registro de un adulto');
   const alex = reg.data.token;
@@ -46,17 +46,20 @@ async function main() {
   assert.ok(venues.data.venues.length >= 10); ok(`lista de ${venues.data.venues.length} locales (respondió ${venues.node})`);
   const marea = venues.data.venues.find((v) => v.slug === 'club-marea');
   assert.equal(marea.summary.enough, true);
-  assert.equal(marea.summary.vibe, 'lgtbi'); ok('Club Marea aparece con ambiente LGTBI+');
+  assert.equal(marea.summary.vibe, 'hombres'); ok('Club Marea aparece con ambiente de mayoría de hombres');
+  assert.ok(marea.summary.gender.length > 0 && !('orientation' in marea.summary)); ok('el ambiente se describe solo por género');
+  const plumas = venues.data.venues.find((v) => v.slug === 'plumas');
+  assert.equal(plumas.summary.vibe, 'mujeres'); ok('Plumas aparece con ambiente de mayoría de mujeres');
   const faro = venues.data.venues.find((v) => v.slug === 'faro');
   assert.equal(faro.summary.enough, false); ok('un local con pocas personas no muestra desglose (k-anonimato)');
 
-  const lgtbi = await call('GET', '/api/venues?vibe=lgtbi', null, alex);
-  assert.ok(lgtbi.data.venues.every((v) => v.summary.vibe === 'lgtbi')); ok('filtro por ambiente');
+  const mujeres = await call('GET', '/api/venues?vibe=mujeres', null, alex);
+  assert.ok(mujeres.data.venues.length > 0 && mujeres.data.venues.every((v) => v.summary.vibe === 'mujeres')); ok('filtro por ambiente');
 
   const peopleBefore = await call('GET', `/api/venues/${marea.id}/people`, null, alex);
   assert.equal(peopleBefore.status, 403); ok('sin check-in no se ve a nadie');
 
-  await call('PATCH', '/api/me', { visibleInVenue: true, showOrientation: true }, alex);
+  await call('PATCH', '/api/me', { visibleInVenue: true }, alex);
   const ck = await call('POST', `/api/venues/${marea.id}/checkin`, { lat: marea.lat, lng: marea.lng }, alex);
   assert.equal(ck.status, 201); ok('check-in en Club Marea');
   await call('POST', `/api/venues/${marea.id}/checkin`, { lat: marea.lat, lng: marea.lng }, demo);

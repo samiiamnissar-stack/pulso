@@ -12,7 +12,6 @@ const router = express.Router();
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 30, standardHeaders: 'draft-7', legacyHeaders: false });
 
 const GENDERS = ['mujer', 'hombre', 'no_binario', 'otro'];
-const ORIENTATIONS = ['hetero', 'gay', 'lesbiana', 'bisexual', 'otra', 'prefiero_no_decir'];
 
 function publicUser(u) {
   return {
@@ -21,15 +20,13 @@ function publicUser(u) {
     alias: u.alias,
     age: ageFrom(u.birthdate),
     gender: u.gender,
-    orientation: u.orientation,
     bio: u.bio,
     visibleInVenue: u.visible_in_venue,
-    showOrientation: u.show_orientation,
   };
 }
 
 router.post('/register', limiter, async (req, res) => {
-  const { email, password, alias, birthdate, gender, orientation, consent } = req.body || {};
+  const { email, password, alias, birthdate, gender, consent } = req.body || {};
   const mail = String(email || '').trim().toLowerCase();
 
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(mail)) return res.status(400).json({ error: 'El correo no es válido' });
@@ -39,15 +36,14 @@ router.post('/register', limiter, async (req, res) => {
   if (!birthdate || Number.isNaN(Date.parse(birthdate))) return res.status(400).json({ error: 'Indica tu fecha de nacimiento' });
   if (ageFrom(birthdate) < config.minAge) return res.status(403).json({ error: `Pulso es solo para mayores de ${config.minAge} años` });
   if (!GENDERS.includes(gender)) return res.status(400).json({ error: 'Elige un género de la lista' });
-  if (!ORIENTATIONS.includes(orientation)) return res.status(400).json({ error: 'Elige una orientación de la lista' });
-  if (consent !== true) return res.status(400).json({ error: 'Necesitamos tu consentimiento expreso para tratar la orientación sexual' });
+  if (consent !== true) return res.status(400).json({ error: 'Tienes que aceptar la política de privacidad' });
 
   const hash = await bcrypt.hash(password, 10);
   try {
     const { rows } = await db.query(
-      `INSERT INTO users (email, password_hash, alias, birthdate, gender, orientation, consent_at)
-       VALUES ($1,$2,$3,$4,$5,$6, now()) RETURNING *`,
-      [mail, hash, name, birthdate, gender, orientation],
+      `INSERT INTO users (email, password_hash, alias, birthdate, gender, consent_at)
+       VALUES ($1,$2,$3,$4,$5, now()) RETURNING *`,
+      [mail, hash, name, birthdate, gender],
     );
     return res.status(201).json({ token: sign(rows[0]), user: publicUser(rows[0]) });
   } catch (err) {
@@ -65,4 +61,4 @@ router.post('/login', limiter, async (req, res) => {
   return res.json({ token: sign(user), user: publicUser(user) });
 });
 
-module.exports = { router, publicUser, GENDERS, ORIENTATIONS };
+module.exports = { router, publicUser, GENDERS };

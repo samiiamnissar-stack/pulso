@@ -1,0 +1,23 @@
+enable
+configure terminal
+no ip domain-lookup
+hostname R-INTERNET
+interface g0/0
+ description Usuarios de Internet
+ ip address 198.51.100.1 255.255.255.0
+ no shutdown
+interface g0/1
+ description Hacia operador A
+ ip address 100.64.1.1 255.255.255.252
+ no shutdown
+interface g0/2
+ description Hacia operador B
+ ip address 100.64.2.1 255.255.255.252
+ no shutdown
+router ospf 1
+ router-id 1.1.1.1
+ network 198.51.100.0 0.0.0.255 area 0
+ network 100.64.1.0 0.0.0.3 area 0
+ network 100.64.2.0 0.0.0.3 area 0
+end
+write memory

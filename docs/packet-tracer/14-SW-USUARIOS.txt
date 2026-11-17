@@ -1,0 +1,6 @@
+enable
+configure terminal
+no ip domain-lookup
+hostname SW-USUARIOS
+end
+write memory

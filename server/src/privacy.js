@@ -1,40 +1,29 @@
 // Reglas de privacidad del "ambiente" de cada local.
 //
-// La idea es que cualquiera pueda saber qué tipo de público hay en un local
-// sin que se pueda deducir quién es cada persona:
+// El ambiente se describe por el género del público (mujeres, hombres y
+// personas no binarias). La idea es que se pueda saber qué tipo de público
+// hay en un local sin poder deducir quién es cada persona:
 //   1. Si hay menos de K personas (k-anonimato), no se enseña ningún desglose.
-//   2. Los grupos con menos de MIN_GROUP personas se suman a "otras".
+//   2. Los grupos con menos de MIN_GROUP personas se suman a "otras" (y si
+//      "otras" sigue siendo muy pequeño, no se muestra).
 //   3. Los porcentajes se redondean a múltiplos de 5.
-//   4. La gente que marca "prefiero no decir" cuenta en el total, pero no
-//      aparece como categoría propia.
 
 const LABELS = {
-  orientation: {
-    hetero: 'Hetero',
-    gay: 'Gay',
-    lesbiana: 'Lesbiana',
-    bisexual: 'Bisexual',
-    otra: 'Otras',
-  },
-  gender: {
-    mujer: 'Mujeres',
-    hombre: 'Hombres',
-    no_binario: 'No binarias',
-    otro: 'Otras',
-  },
+  mujer: 'Mujeres',
+  hombre: 'Hombres',
+  no_binario: 'No binarias',
+  otro: 'Otras',
 };
 
 const round5 = (n) => Math.round(n / 5) * 5;
 
 // rows: [{ key, n }]  →  [{ key, label, pct }]
-function breakdown(rows, total, kind, minGroup) {
-  const labels = LABELS[kind];
+function breakdown(rows, total, minGroup) {
   const groups = {};
   let others = 0;
   for (const { key, n } of rows) {
-    if (key === 'prefiero_no_decir') continue;
     const count = Number(n);
-    if (count < minGroup || key === 'otra' || key === 'otro') others += count;
+    if (count < minGroup || key === 'otro') others += count;
     else groups[key] = count;
   }
   if (others > 0 && others < minGroup) {
@@ -42,19 +31,17 @@ function breakdown(rows, total, kind, minGroup) {
     others = 0;
   }
   const out = Object.entries(groups)
-    .map(([key, count]) => ({ key, label: labels[key], pct: round5((count / total) * 100) }))
+    .map(([key, count]) => ({ key, label: LABELS[key], pct: round5((count / total) * 100) }))
     .sort((a, b) => b.pct - a.pct);
   if (others > 0) out.push({ key: 'otras', label: 'Otras', pct: round5((others / total) * 100) });
   return out.filter((g) => g.pct > 0);
 }
 
 // Etiqueta corta para filtrar locales por ambiente
-function vibe(orientationBreakdown) {
-  const pct = (k) => orientationBreakdown.find((g) => g.key === k)?.pct ?? 0;
-  const lgtbi = pct('gay') + pct('lesbiana') + pct('bisexual') + pct('otras');
-  const hetero = pct('hetero');
-  if (lgtbi >= 60) return 'lgtbi';
-  if (hetero >= 70) return 'hetero';
+function vibe(genderBreakdown) {
+  const pct = (k) => genderBreakdown.find((g) => g.key === k)?.pct ?? 0;
+  if (pct('mujer') >= 60) return 'mujeres';
+  if (pct('hombre') >= 60) return 'hombres';
   return 'mixto';
 }
 
@@ -70,7 +57,7 @@ function crowdLevel(total, capacity) {
  * Construye el resumen público de un local a partir de los recuentos crudos.
  * Nunca devuelve recuentos exactos por categoría, solo porcentajes redondeados.
  */
-function venueSummary({ total, capacity, orientations, genders, avgAge }, { k, minGroup }) {
+function venueSummary({ total, capacity, genders, avgAge }, { k, minGroup }) {
   total = Number(total);
   if (total < k) {
     return {
@@ -78,20 +65,18 @@ function venueSummary({ total, capacity, orientations, genders, avgAge }, { k, m
       people: `menos de ${k}`,
       crowd: 'tranquilo',
       vibe: null,
-      orientation: [],
       gender: [],
       avgAge: null,
     };
   }
-  const orientation = breakdown(orientations, total, 'orientation', minGroup);
+  const gender = breakdown(genders, total, minGroup);
   return {
     enough: true,
     // el total se redondea a la decena para no delatar entradas/salidas concretas
     people: Math.floor(total / 10) * 10,
     crowd: crowdLevel(total, capacity),
-    vibe: vibe(orientation),
-    orientation,
-    gender: breakdown(genders, total, 'gender', minGroup),
+    vibe: vibe(gender),
+    gender,
     avgAge: avgAge ? Math.round(Number(avgAge)) : null,
   };
 }

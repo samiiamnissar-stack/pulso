@@ -16,15 +16,12 @@ const ACTIVE = 'c.ended_at IS NULL AND c.expires_at > now()';
 // la base de datos solo hace este trabajo dos veces por minuto.
 async function allSummaries() {
   return cached('stats:all', config.statsCacheSeconds, async () => {
-    const [venues, totals, orient, genders] = await Promise.all([
+    const [venues, totals, genders] = await Promise.all([
       db.read('SELECT * FROM venues ORDER BY name'),
       db.read(`SELECT c.venue_id, count(*) AS total,
                       avg(extract(year FROM age(u.birthdate))) AS avg_age
                FROM checkins c JOIN users u ON u.id = c.user_id
                WHERE ${ACTIVE} GROUP BY c.venue_id`),
-      db.read(`SELECT c.venue_id, u.orientation AS key, count(*) AS n
-               FROM checkins c JOIN users u ON u.id = c.user_id
-               WHERE ${ACTIVE} GROUP BY 1, 2`),
       db.read(`SELECT c.venue_id, u.gender AS key, count(*) AS n
                FROM checkins c JOIN users u ON u.id = c.user_id
                WHERE ${ACTIVE} GROUP BY 1, 2`),
@@ -49,7 +46,6 @@ async function allSummaries() {
             total: t ? t.total : 0,
             capacity: v.capacity,
             avgAge: t ? t.avg_age : null,
-            orientations: byVenue(orient.rows, v.id),
             genders: byVenue(genders.rows, v.id),
           },
           { k: config.kAnonymity, minGroup: config.minGroup },
@@ -133,7 +129,6 @@ router.get('/:id/people', async (req, res) => {
 
   const { rows } = await db.query(
     `SELECT u.id, u.alias, u.birthdate, u.gender, u.bio,
-            CASE WHEN u.show_orientation THEN u.orientation END AS orientation,
             EXISTS (SELECT 1 FROM likes l WHERE l.from_user = $1 AND l.to_user = u.id) AS liked
      FROM checkins c JOIN users u ON u.id = c.user_id
      WHERE c.venue_id = $2 AND ${ACTIVE}
@@ -146,7 +141,7 @@ router.get('/:id/people', async (req, res) => {
   return res.json({
     people: rows.map((p) => ({
       id: p.id, alias: p.alias, age: ageFrom(p.birthdate), gender: p.gender,
-      orientation: p.orientation, bio: p.bio, liked: p.liked,
+      bio: p.bio, liked: p.liked,
     })),
   });
 });

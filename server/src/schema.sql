@@ -9,12 +9,21 @@ CREATE TABLE IF NOT EXISTS users (
   alias            TEXT NOT NULL,
   birthdate        DATE NOT NULL,
   gender           TEXT NOT NULL CHECK (gender IN ('mujer','hombre','no_binario','otro')),
-  orientation      TEXT NOT NULL CHECK (orientation IN ('hetero','gay','lesbiana','bisexual','otra','prefiero_no_decir')),
   bio              TEXT NOT NULL DEFAULT '',
   visible_in_venue BOOLEAN NOT NULL DEFAULT FALSE,  -- opt-in: por defecto nadie es visible
-  show_orientation BOOLEAN NOT NULL DEFAULT FALSE,  -- aunque sea visible, la orientación se oculta salvo que lo active
-  consent_at       TIMESTAMPTZ NOT NULL,            -- consentimiento explícito (art. 9.2.a RGPD)
+  consent_at       TIMESTAMPTZ NOT NULL,            -- aceptación de la política de privacidad
   created_at       TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- Versiones anteriores guardaban la orientación sexual. Ya no se usa:
+-- el ambiente se calcula solo con el género, así que se borra.
+ALTER TABLE users DROP COLUMN IF EXISTS orientation;
+ALTER TABLE users DROP COLUMN IF EXISTS show_orientation;
+
+-- Datos internos de la app (por ejemplo, la versión de los datos de demo)
+CREATE TABLE IF NOT EXISTS app_meta (
+  key   TEXT PRIMARY KEY,
+  value TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS venues (

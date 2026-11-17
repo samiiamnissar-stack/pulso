@@ -33,7 +33,7 @@ async function main() {
   // Reparto de peticiones (en 10 "turnos"): 6 lista, 2 detalle, 1 perfil, 1 matches
   const requests = [
     { method: 'GET', path: '/api/venues?lat=40.4234&lng=-3.6979', headers },
-    { method: 'GET', path: '/api/venues?vibe=lgtbi', headers },
+    { method: 'GET', path: '/api/venues?vibe=mujeres', headers },
     { method: 'GET', path: '/api/venues?lat=40.4100&lng=-3.7000', headers },
     { method: 'GET', path: '/api/venues/2', headers },
     { method: 'GET', path: '/api/venues', headers },

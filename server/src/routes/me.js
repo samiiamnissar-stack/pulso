@@ -2,7 +2,7 @@ const express = require('express');
 const db = require('../db');
 const { invalidate } = require('../redis');
 const { requireAuth } = require('../auth');
-const { publicUser, GENDERS, ORIENTATIONS } = require('./auth');
+const { publicUser, GENDERS } = require('./auth');
 
 const router = express.Router();
 router.use(requireAuth);
@@ -34,12 +34,7 @@ router.patch('/', async (req, res) => {
     if (!GENDERS.includes(b.gender)) return res.status(400).json({ error: 'Género no válido' });
     add('gender', b.gender);
   }
-  if (b.orientation !== undefined) {
-    if (!ORIENTATIONS.includes(b.orientation)) return res.status(400).json({ error: 'Orientación no válida' });
-    add('orientation', b.orientation);
-  }
   if (b.visibleInVenue !== undefined) add('visible_in_venue', Boolean(b.visibleInVenue));
-  if (b.showOrientation !== undefined) add('show_orientation', Boolean(b.showOrientation));
   if (!sets.length) return res.status(400).json({ error: 'No hay nada que cambiar' });
 
   vals.push(req.userId);
@@ -52,7 +47,7 @@ router.patch('/', async (req, res) => {
 router.get('/export', async (req, res) => {
   const id = req.userId;
   const [user, checkins, likes, matches, messages, blocks] = await Promise.all([
-    db.query('SELECT id, email, alias, birthdate, gender, orientation, bio, visible_in_venue, show_orientation, consent_at, created_at FROM users WHERE id=$1', [id]),
+    db.query('SELECT id, email, alias, birthdate, gender, bio, visible_in_venue, consent_at, created_at FROM users WHERE id=$1', [id]),
     db.query('SELECT venue_id, created_at, expires_at, ended_at FROM checkins WHERE user_id=$1 ORDER BY created_at', [id]),
     db.query('SELECT to_user, created_at FROM likes WHERE from_user=$1', [id]),
     db.query('SELECT id, user_a, user_b, venue_id, created_at FROM matches WHERE user_a=$1 OR user_b=$1', [id]),

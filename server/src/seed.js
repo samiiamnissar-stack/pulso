@@ -7,23 +7,23 @@ const { migrate } = require('./migrate');
 const { invalidate, redis } = require('./redis');
 
 // Los nombres de los locales son inventados.
-// Pesos de orientación: [hetero, gay, lesbiana, bisexual, otra, prefiero_no_decir]
+// Pesos de género del público: [mujer, hombre, no_binario, otro]
 const VENUES = [
-  { slug: 'sala-neon', name: 'Sala Neón', barrio: 'Malasaña', address: 'C/ del Espíritu Santo (zona)', lat: 40.4258, lng: -3.7046, capacity: 450, music: 'Indie y pop', w: [55, 12, 8, 18, 4, 3], fill: 0.55 },
-  { slug: 'club-marea', name: 'Club Marea', barrio: 'Chueca', address: 'C/ de Pelayo (zona)', lat: 40.4234, lng: -3.6979, capacity: 600, music: 'Pop y electrónica', w: [10, 52, 12, 18, 5, 3], fill: 0.7 },
-  { slug: 'plumas', name: 'Plumas', barrio: 'Chueca', address: 'C/ de la Libertad (zona)', lat: 40.4214, lng: -3.6965, capacity: 300, music: 'Divas pop y drag', w: [8, 45, 20, 18, 6, 3], fill: 0.6 },
-  { slug: 'boveda', name: 'Bóveda', barrio: 'La Latina', address: 'Cava Baja (zona)', lat: 40.4118, lng: -3.7086, capacity: 350, music: 'Reguetón y latino', w: [78, 5, 3, 9, 2, 3], fill: 0.5 },
-  { slug: 'fabrica-de-luz', name: 'La Fábrica de Luz', barrio: 'Lavapiés', address: 'C/ de Argumosa (zona)', lat: 40.4085, lng: -3.6995, capacity: 800, music: 'Techno', w: [40, 18, 12, 22, 5, 3], fill: 0.45 },
-  { slug: 'ambar', name: 'Ámbar', barrio: 'Huertas', address: 'C/ de las Huertas (zona)', lat: 40.4140, lng: -3.6990, capacity: 250, music: 'Funk y soul', w: [62, 10, 6, 16, 3, 3], fill: 0.35 },
-  { slug: 'terraza-orion', name: 'Terraza Orión', barrio: 'Salamanca', address: 'C/ de Serrano (zona)', lat: 40.4300, lng: -3.6865, capacity: 500, music: 'Comercial', w: [82, 5, 2, 7, 1, 3], fill: 0.4 },
-  { slug: 'sotano-23', name: 'Sótano 23', barrio: 'Argüelles', address: 'C/ de la Princesa (zona)', lat: 40.4300, lng: -3.7160, capacity: 400, music: 'Universitaria', w: [70, 8, 5, 12, 2, 3], fill: 0.65 },
-  { slug: 'nave-9', name: 'Nave 9', barrio: 'Usera', address: 'C/ de Marcelo Usera (zona)', lat: 40.3890, lng: -3.7075, capacity: 900, music: 'Electrónica', w: [45, 16, 10, 22, 4, 3], fill: 0.3 },
-  { slug: 'cupula', name: 'Cúpula', barrio: 'Chamberí', address: 'C/ de Fuencarral (zona)', lat: 40.4330, lng: -3.7020, capacity: 350, music: 'Hits 2000', w: [65, 9, 6, 15, 2, 3], fill: 0.25 },
-  { slug: 'electra', name: 'Electra', barrio: 'Gran Vía', address: 'Gran Vía (zona)', lat: 40.4200, lng: -3.7050, capacity: 700, music: 'House', w: [35, 30, 8, 20, 4, 3], fill: 0.5 },
-  { slug: 'faro', name: 'Faro', barrio: 'Villaverde', address: 'Av. de Andalucía (zona)', lat: 40.3500, lng: -3.6960, capacity: 300, music: 'Flamenco fusión y rumba', w: [80, 5, 3, 8, 1, 3], fill: 0.015 },
+  { slug: 'sala-neon', name: 'Sala Neón', barrio: 'Malasaña', address: 'C/ del Espíritu Santo (zona)', lat: 40.4258, lng: -3.7046, capacity: 450, music: 'Indie y pop', w: [50, 44, 5, 1], fill: 0.55 },
+  { slug: 'club-marea', name: 'Club Marea', barrio: 'Chueca', address: 'C/ de Pelayo (zona)', lat: 40.4234, lng: -3.6979, capacity: 600, music: 'Pop y electrónica', w: [30, 64, 5, 1], fill: 0.7 },
+  { slug: 'plumas', name: 'Plumas', barrio: 'Chueca', address: 'C/ de la Libertad (zona)', lat: 40.4214, lng: -3.6965, capacity: 300, music: 'Divas pop y drag', w: [68, 26, 5, 1], fill: 0.6 },
+  { slug: 'boveda', name: 'Bóveda', barrio: 'La Latina', address: 'Cava Baja (zona)', lat: 40.4118, lng: -3.7086, capacity: 350, music: 'Reguetón y latino', w: [45, 52, 2, 1], fill: 0.5 },
+  { slug: 'fabrica-de-luz', name: 'La Fábrica de Luz', barrio: 'Lavapiés', address: 'C/ de Argumosa (zona)', lat: 40.4085, lng: -3.6995, capacity: 800, music: 'Techno', w: [42, 48, 9, 1], fill: 0.45 },
+  { slug: 'ambar', name: 'Ámbar', barrio: 'Huertas', address: 'C/ de las Huertas (zona)', lat: 40.4140, lng: -3.6990, capacity: 250, music: 'Funk y soul', w: [66, 30, 3, 1], fill: 0.35 },
+  { slug: 'terraza-orion', name: 'Terraza Orión', barrio: 'Salamanca', address: 'C/ de Serrano (zona)', lat: 40.4300, lng: -3.6865, capacity: 500, music: 'Comercial', w: [33, 65, 1, 1], fill: 0.4 },
+  { slug: 'sotano-23', name: 'Sótano 23', barrio: 'Argüelles', address: 'C/ de la Princesa (zona)', lat: 40.4300, lng: -3.7160, capacity: 400, music: 'Universitaria', w: [52, 45, 2, 1], fill: 0.65 },
+  { slug: 'nave-9', name: 'Nave 9', barrio: 'Usera', address: 'C/ de Marcelo Usera (zona)', lat: 40.3890, lng: -3.7075, capacity: 900, music: 'Electrónica', w: [40, 50, 9, 1], fill: 0.3 },
+  { slug: 'cupula', name: 'Cúpula', barrio: 'Chamberí', address: 'C/ de Fuencarral (zona)', lat: 40.4330, lng: -3.7020, capacity: 350, music: 'Hits 2000', w: [70, 27, 2, 1], fill: 0.25 },
+  { slug: 'electra', name: 'Electra', barrio: 'Gran Vía', address: 'Gran Vía (zona)', lat: 40.4200, lng: -3.7050, capacity: 700, music: 'House', w: [28, 66, 5, 1], fill: 0.5 },
+  { slug: 'faro', name: 'Faro', barrio: 'Villaverde', address: 'Av. de Andalucía (zona)', lat: 40.3500, lng: -3.6960, capacity: 300, music: 'Flamenco fusión y rumba', w: [48, 50, 1, 1], fill: 0.015 },
 ];
 
-const ORIENTATIONS = ['hetero', 'gay', 'lesbiana', 'bisexual', 'otra', 'prefiero_no_decir'];
+const GENDERS = ['mujer', 'hombre', 'no_binario', 'otro'];
 const ALIASES = ['Lucía', 'Hugo', 'Martina', 'Mateo', 'Sofía', 'Leo', 'Valeria', 'Pablo', 'Paula', 'Daniel', 'Alba', 'Álvaro',
   'Julia', 'Adrián', 'Emma', 'Mario', 'Noa', 'Diego', 'Carla', 'Marcos', 'Irene', 'Bruno', 'Sara', 'Iker', 'Lola', 'Nico',
   'Vega', 'Gael', 'Aitana', 'Unai', 'Inés', 'Rubén', 'Nerea', 'Samir', 'Yasmin', 'Omar', 'Nadia', 'Andrea', 'Eric', 'Claudia'];
@@ -40,15 +40,6 @@ const weighted = (weights) => {
   for (let i = 0; i < weights.length; i += 1) { r -= weights[i]; if (r <= 0) return i; }
   return weights.length - 1;
 };
-
-function genderFor(orientation) {
-  if (orientation === 'gay') return rnd() < 0.92 ? 'hombre' : 'no_binario';
-  if (orientation === 'lesbiana') return rnd() < 0.92 ? 'mujer' : 'no_binario';
-  const r = rnd();
-  if (r < 0.48) return 'mujer';
-  if (r < 0.95) return 'hombre';
-  return r < 0.98 ? 'no_binario' : 'otro';
-}
 
 function birthdate() {
   const age = 18 + Math.floor(rnd() * 13); // 18 a 30
@@ -76,8 +67,8 @@ async function seedAll() {
 
   // Cuenta de demostración
   const { rows: demo } = await db.query(
-    `INSERT INTO users (email, password_hash, alias, birthdate, gender, orientation, bio, visible_in_venue, show_orientation, consent_at)
-     VALUES ('demo@pulso.app', $1, 'Demo', '2001-05-20', 'mujer', 'bisexual', 'Cuenta de prueba', true, true, now()) RETURNING id`,
+    `INSERT INTO users (email, password_hash, alias, birthdate, gender, bio, visible_in_venue, consent_at)
+     VALUES ('demo@pulso.app', $1, 'Demo', '2001-05-20', 'mujer', 'Cuenta de prueba', true, now()) RETURNING id`,
     [hash],
   );
   const demoId = demo[0].id;
@@ -88,19 +79,19 @@ async function seedAll() {
     const values = [];
     const params = [];
     for (let i = 0; i < people; i += 1) {
-      const orientation = ORIENTATIONS[weighted(v.w)];
+      const gender = GENDERS[weighted(v.w)];
       const visible = rnd() < 0.4;
       params.push(
         `user${n}@ejemplo.pulso`, hash, `${pick(ALIASES)}${rnd() < 0.3 ? ` ${Math.floor(rnd() * 90 + 10)}` : ''}`,
-        birthdate(), genderFor(orientation), orientation, pick(BIOS), visible, visible && rnd() < 0.6,
+        birthdate(), gender, pick(BIOS), visible,
       );
-      const b = values.length * 9;
-      values.push(`($${b + 1},$${b + 2},$${b + 3},$${b + 4},$${b + 5},$${b + 6},$${b + 7},$${b + 8},$${b + 9}, now())`);
+      const b = values.length * 7;
+      values.push(`($${b + 1},$${b + 2},$${b + 3},$${b + 4},$${b + 5},$${b + 6},$${b + 7}, now())`);
       n += 1;
     }
     if (!values.length) continue;
     const { rows: users } = await db.query(
-      `INSERT INTO users (email, password_hash, alias, birthdate, gender, orientation, bio, visible_in_venue, show_orientation, consent_at)
+      `INSERT INTO users (email, password_hash, alias, birthdate, gender, bio, visible_in_venue, consent_at)
        VALUES ${values.join(',')} RETURNING id, visible_in_venue`,
       params,
     );
@@ -133,10 +124,19 @@ async function refreshDemo() {
   return rowCount;
 }
 
+// Si cambian los datos de ejemplo, se sube esta versión y la demo se recarga sola
+const DEMO_VERSION = '2';
+
 async function ensureDemoData() {
   const { rows } = await db.query('SELECT count(*)::int AS n FROM venues');
-  if (rows[0].n === 0) {
+  const { rows: meta } = await db.query("SELECT value FROM app_meta WHERE key = 'demo_version'");
+  if (rows[0].n === 0 || meta[0]?.value !== DEMO_VERSION) {
     const r = await seedAll();
+    await db.query(
+      `INSERT INTO app_meta (key, value) VALUES ('demo_version', $1)
+       ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`,
+      [DEMO_VERSION],
+    );
     console.log(`[demo] datos de ejemplo cargados: ${r.venues} locales y ${r.users} usuarios`);
   }
   await refreshDemo();

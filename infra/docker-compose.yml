@@ -55,8 +55,10 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pulso}
       POSTGRES_DB: pulso
       REPLICATION_PASSWORD: ${REPLICATION_PASSWORD:-replica}
+    # wal_keep_size guarda 1 GB de WAL para que, si la réplica se para un rato,
+    # pueda ponerse al día al volver en lugar de tener que copiarse entera.
     command: >
-      postgres -c wal_level=replica -c max_wal_senders=5 -c hot_standby=on
+      postgres -c wal_level=replica -c max_wal_senders=5 -c hot_standby=on -c wal_keep_size=1GB
     volumes:
       - pg-primary:/var/lib/postgresql/data
       - ./postgres/primary-init.sh:/docker-entrypoint-initdb.d/10-replication.sh:ro

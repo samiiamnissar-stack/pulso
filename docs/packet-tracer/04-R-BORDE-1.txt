@@ -1,0 +1,23 @@
+enable
+configure terminal
+no ip domain-lookup
+hostname R-BORDE-1
+interface g0/0
+ description Operador A
+ ip address 203.0.113.2 255.255.255.252
+ no shutdown
+interface g0/1
+ description Hacia FW-1
+ ip address 10.0.1.1 255.255.255.252
+ no shutdown
+interface g0/2
+ description Enlace con R-BORDE-2
+ ip address 10.0.0.1 255.255.255.252
+ no shutdown
+router ospf 1
+ router-id 3.3.3.1
+ network 203.0.113.0 0.0.0.3 area 0
+ network 10.0.1.0 0.0.0.3 area 0
+ network 10.0.0.0 0.0.0.3 area 0
+end
+write memory

@@ -1,0 +1,47 @@
+enable
+configure terminal
+no ip domain-lookup
+hostname SW-GESTION
+vlan 10
+ name GESTION
+vlan 20
+ name API
+vlan 30
+ name TIEMPO-REAL
+vlan 40
+ name BASES-DATOS
+vlan 50
+ name CACHE
+vlan 60
+ name COPIAS
+vlan 70
+ name DMZ
+vlan 80
+ name MONITORIZACION
+vlan 90
+ name SERVICIOS
+interface range f0/1
+ description Bastion
+ switchport mode access
+ switchport access vlan 10
+ spanning-tree portfast
+interface range f0/2
+ description Copias
+ switchport mode access
+ switchport access vlan 60
+ spanning-tree portfast
+interface range f0/3
+ description Monitorizacion
+ switchport mode access
+ switchport access vlan 80
+ spanning-tree portfast
+interface range f0/4
+ description DNS y NTP internos
+ switchport mode access
+ switchport access vlan 90
+ spanning-tree portfast
+interface range g0/1 - 2
+ description Subida a CORE-1 (g0/1) y CORE-2 (g0/2)
+ switchport mode trunk
+end
+write memory

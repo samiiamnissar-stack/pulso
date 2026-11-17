@@ -18,10 +18,9 @@ const state = {
 };
 
 const LABEL = {
-  hetero: 'Hetero', gay: 'Gay', lesbiana: 'Lesbiana', bisexual: 'Bisexual', otra: 'Otra', prefiero_no_decir: 'Prefiero no decirlo',
   mujer: 'Mujer', hombre: 'Hombre', no_binario: 'No binaria', otro: 'Otro',
 };
-const VIBE = { lgtbi: 'LGTBI+', mixto: 'Mixto', hetero: 'Hetero' };
+const VIBE = { mujeres: 'Más mujeres', mixto: 'Mixto', hombres: 'Más hombres' };
 const CROWD = { tranquilo: 1, animado: 2, lleno: 3, 'a tope': 4 };
 const AVATAR = ['#ff3d8b', '#2de2e6', '#ffb547', '#8b5cf6', '#3ddc97'];
 
@@ -193,7 +192,7 @@ function viewAuth() {
           method: 'POST',
           body: {
             email: f.get('email'), password: f.get('password'), alias: f.get('alias'), birthdate: f.get('birthdate'),
-            gender: f.get('gender'), orientation: f.get('orientation'), consent: f.get('consent') === 'on',
+            gender: f.get('gender'), consent: f.get('consent') === 'on',
           },
         });
         onLogged(data);
@@ -205,10 +204,9 @@ function viewAuth() {
   h('label', {}, 'Contraseña (mínimo 8 caracteres)', h('input', { name: 'password', type: 'password', minlength: 8, autocomplete: 'new-password', required: true })),
   h('label', {}, 'Fecha de nacimiento', h('input', { name: 'birthdate', type: 'date', max: max.toISOString().slice(0, 10), required: true })),
   h('label', {}, 'Género', h('select', { name: 'gender', required: true }, ['mujer', 'hombre', 'no_binario', 'otro'].map(option))),
-  h('label', {}, 'Orientación', h('select', { name: 'orientation', required: true }, ['hetero', 'gay', 'lesbiana', 'bisexual', 'otra', 'prefiero_no_decir'].map(option))),
   h('label', { class: 'check' },
     h('input', { type: 'checkbox', name: 'consent', required: true }),
-    h('span', {}, 'Consiento que Pulso use mi orientación sexual solo para calcular el ambiente de cada local de forma anónima. Nadie la verá a menos que yo active «mostrar orientación». Puedo retirar este consentimiento borrando mi cuenta.')),
+    h('span', {}, 'He leído y acepto la política de privacidad: mi género y mi edad solo se usan de forma anónima para calcular el ambiente de cada local, nunca se guardan mis coordenadas y puedo borrar mi cuenta cuando quiera.')),
   err,
   h('button', { class: 'btn', type: 'submit' }, 'Crear cuenta'),
   h('p', { class: 'note' }, `Solo para mayores de ${state.config.minAge} años.`));
@@ -242,7 +240,7 @@ async function onLogged(data) {
 
 async function viewHome() {
   const list = h('div', { class: 'list' }, [1, 2, 3, 4].map(() => h('div', { class: 'skeleton' })));
-  const filters = [['todos', 'Todos'], ['lgtbi', 'LGTBI+'], ['mixto', 'Mixto'], ['hetero', 'Hetero']];
+  const filters = [['todos', 'Todos'], ['mujeres', 'Más mujeres'], ['mixto', 'Mixto'], ['hombres', 'Más hombres']];
   const chips = h('div', { class: 'chips', role: 'group', 'aria-label': 'Filtrar por ambiente' },
     filters.map(([k, label]) => h('button', {
       class: 'chip', 'aria-pressed': String(state.filter === k),
@@ -277,7 +275,7 @@ async function viewHome() {
         h('span', { class: 'venue-meta' }, fmtDistance(v.distance))),
       h('div', { class: 'venue-meta' }, `${v.barrio} · ${v.music}`),
       h('div', { class: 'venue-row' }, vibeTag(v.summary), crowdMeter(v.summary.crowd)),
-      stackBar(v.summary.orientation, 'Ambiente'))));
+      stackBar(v.summary.gender, 'Ambiente'))));
   } catch (ex) {
     list.replaceChildren(h('p', { class: 'empty' }, ex.message));
   }
@@ -326,8 +324,7 @@ async function viewVenue(id) {
         h('div', { class: 'stat' }, h('strong', {}, `${venue.opens}–${venue.closes}`), h('span', {}, 'horario')))),
     s.enough
       ? h('div', { class: 'panel' },
-        h('h2', { style: 'margin-top:0' }, 'Ambiente'), stackBar(s.orientation, 'Orientación'),
-        h('h2', {}, 'Público'), stackBar(s.gender, 'Género'),
+        h('h2', { style: 'margin-top:0' }, 'Ambiente'), stackBar(s.gender, 'Público por género'),
         h('p', { class: 'note' }, 'Porcentajes redondeados de 5 en 5. Los grupos muy pequeños se suman en «Otras» para que nadie sea identificable.'))
       : h('div', { class: 'panel' }, h('p', { class: 'note', style: 'margin:0' }, `Hay menos de ${state.config.k} personas con Pulso aquí. Para proteger su privacidad no enseñamos el desglose hasta que haya más gente.`)),
     h('div', { class: 'row' }, checkinBtn),
@@ -362,7 +359,7 @@ async function viewVenue(id) {
       return h('article', { class: 'person' },
         avatar(p.alias),
         h('span', { class: 'name' }, `${p.alias}, ${p.age}`),
-        h('span', { class: 'tag' }, [LABEL[p.gender], p.orientation ? LABEL[p.orientation] : null].filter(Boolean).join(' · ')),
+        h('span', { class: 'tag' }, LABEL[p.gender]),
         h('span', { class: 'bio' }, p.bio || ''),
         btn,
         h('button', {
@@ -456,7 +453,7 @@ async function viewProfile() {
     h('div', { class: 'panel' },
       h('h2', { style: 'margin-top:0' }, 'Privacidad'),
       toggle('visibleInVenue', 'Visible en el local', 'Quien haya hecho check-in en el mismo local verá tu alias, edad y bio.'),
-      toggle('showOrientation', 'Mostrar mi orientación', 'Si está desactivado, solo cuenta de forma anónima en las estadísticas.')),
+      h('p', { class: 'note' }, 'Tu género solo cuenta de forma anónima en el ambiente de cada local, salvo que actives «visible en el local».')),
     h('div', { class: 'panel' },
       h('h2', { style: 'margin-top:0' }, 'Tu perfil'),
       h('form', {
@@ -464,7 +461,7 @@ async function viewProfile() {
           e.preventDefault();
           const f = new FormData(e.target);
           try {
-            await api('/api/me', { method: 'PATCH', body: { alias: f.get('alias'), bio: f.get('bio'), gender: f.get('gender'), orientation: f.get('orientation') } });
+            await api('/api/me', { method: 'PATCH', body: { alias: f.get('alias'), bio: f.get('bio'), gender: f.get('gender') } });
             toast('Perfil actualizado');
           } catch (ex) { toast(ex.message); }
         },
@@ -472,7 +469,6 @@ async function viewProfile() {
       h('label', {}, 'Alias', h('input', { name: 'alias', value: me.alias, maxlength: 30 })),
       h('label', {}, 'Bio', h('textarea', { name: 'bio', maxlength: 160, rows: 2 }, me.bio)),
       h('label', {}, 'Género', h('select', { name: 'gender' }, ['mujer', 'hombre', 'no_binario', 'otro'].map((v) => option(v, me.gender)))),
-      h('label', {}, 'Orientación', h('select', { name: 'orientation' }, ['hetero', 'gay', 'lesbiana', 'bisexual', 'otra', 'prefiero_no_decir'].map((v) => option(v, me.orientation)))),
       h('button', { class: 'btn', type: 'submit' }, 'Guardar'))),
     h('div', { class: 'panel' },
       h('h2', { style: 'margin-top:0' }, 'Tus datos'),

@@ -1,7 +1,7 @@
 // Service worker: guarda la "carcasa" de la app para que abra al instante
 // y funcione aunque la cobertura dentro de la discoteca sea mala.
 // La API nunca se cachea: los datos del ambiente tienen que ser actuales.
-const CACHE = 'pulso-v2';
+const CACHE = 'pulso-v3';
 const SHELL = ['/', '/index.html', '/styles.css', '/app.js', '/manifest.webmanifest', '/icons/icon.svg', '/icons/icon-192.png'];
 
 self.addEventListener('install', (e) => {

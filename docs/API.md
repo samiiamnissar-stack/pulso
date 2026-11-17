@@ -6,21 +6,20 @@ Todas las rutas devuelven JSON. Las que llevan 🔒 necesitan la cabecera `Autho
 
 | Método | Ruta | Qué hace |
 |---|---|---|
-| POST | `/api/auth/register` | Crea una cuenta. Campos: `email`, `password` (mín. 8), `alias`, `birthdate` (AAAA-MM-DD, mayor de 18), `gender`, `orientation`, `consent: true` |
+| POST | `/api/auth/register` | Crea una cuenta. Campos: `email`, `password` (mín. 8), `alias`, `birthdate` (AAAA-MM-DD, mayor de 18), `gender`, `consent: true` (acepta la política de privacidad) |
 | POST | `/api/auth/login` | Devuelve `{ token, user }` |
 | GET 🔒 | `/api/me` | Perfil y check-in activo |
-| PATCH 🔒 | `/api/me` | Cambia `alias`, `bio`, `gender`, `orientation`, `visibleInVenue`, `showOrientation` |
+| PATCH 🔒 | `/api/me` | Cambia `alias`, `bio`, `gender`, `visibleInVenue` |
 | GET 🔒 | `/api/me/export` | Descarga todos tus datos (art. 15 RGPD) |
 | DELETE 🔒 | `/api/me` | Borra la cuenta y todo lo asociado (art. 17 RGPD) |
 
 Valores de `gender`: `mujer`, `hombre`, `no_binario`, `otro`.
-Valores de `orientation`: `hetero`, `gay`, `lesbiana`, `bisexual`, `otra`, `prefiero_no_decir`.
 
 ## Locales
 
 | Método | Ruta | Qué hace |
 |---|---|---|
-| GET 🔒 | `/api/venues?lat=&lng=&vibe=` | Lista de locales con su resumen de ambiente. Con `lat`/`lng` se ordena por distancia. `vibe` filtra: `lgtbi`, `mixto`, `hetero` |
+| GET 🔒 | `/api/venues?lat=&lng=&vibe=` | Lista de locales con su resumen de ambiente. Con `lat`/`lng` se ordena por distancia. `vibe` filtra: `mujeres` (≥ 60 % mujeres), `hombres` (≥ 60 % hombres) o `mixto` |
 | GET 🔒 | `/api/venues/:id` | Un local |
 | POST 🔒 | `/api/venues/:id/checkin` | Check-in. Body `{ lat, lng }`; hay que estar a menos de 300 m (salvo en modo demo) |
 | DELETE 🔒 | `/api/venues/checkin/current` | Salir del local |
@@ -33,10 +32,13 @@ Ejemplo de resumen de un local:
   "enough": true,
   "people": 140,
   "crowd": "animado",
-  "vibe": "lgtbi",
-  "orientation": [{ "key": "gay", "label": "Gay", "pct": 55 }, { "key": "bisexual", "label": "Bisexual", "pct": 20 }],
-  "gender": [{ "key": "hombre", "label": "Hombres", "pct": 60 }],
-  "avgAge": 24
+  "vibe": "hombres",
+  "gender": [
+    { "key": "hombre", "label": "Hombres", "pct": 60 },
+    { "key": "mujer", "label": "Mujeres", "pct": 35 },
+    { "key": "no_binario", "label": "No binarias", "pct": 5 }
+  ],
+  "avgAge": 25
 }
 ```
 

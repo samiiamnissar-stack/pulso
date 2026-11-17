@@ -1,0 +1,35 @@
+enable
+configure terminal
+no ip domain-lookup
+hostname FW-2
+ip access-list extended DESDE-INTERNET
+ remark Rutas entre routers
+ permit ospf any any
+ remark Solo se puede entrar a los balanceadores, por web
+ permit tcp any 10.10.70.0 0.0.0.255 eq 80
+ permit tcp any 10.10.70.0 0.0.0.255 eq 443
+ permit icmp any 10.10.70.0 0.0.0.255 echo
+ remark Respuestas a conexiones que salieron desde dentro
+ permit tcp any any established
+ permit icmp any any echo-reply
+ deny ip any any
+interface g0/0
+ description Exterior (R-BORDE-2)
+ ip address 10.0.2.2 255.255.255.252
+ ip access-group DESDE-INTERNET in
+ no shutdown
+interface g0/1
+ description Interior (CORE-2)
+ ip address 10.0.12.1 255.255.255.252
+ no shutdown
+interface g0/2
+ description Enlace con FW-1
+ ip address 10.0.3.2 255.255.255.252
+ no shutdown
+router ospf 1
+ router-id 4.4.4.2
+ network 10.0.2.0 0.0.0.3 area 0
+ network 10.0.12.0 0.0.0.3 area 0
+ network 10.0.3.0 0.0.0.3 area 0
+end
+write memory

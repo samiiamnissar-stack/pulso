@@ -1,8 +1,10 @@
 # Pulso · el ambiente de la noche
 
-Pulso es una app móvil (PWA) para saber **qué ambiente hay esta noche en cada discoteca** antes de salir: afluencia, edad media y reparto aproximado del público por orientación y por género. Así cada persona puede elegir a dónde ir según lo que busca, ya sea un sitio LGTBI+, uno mixto o uno mayoritariamente hetero.
+Pulso es una app móvil (PWA) para saber **qué ambiente hay esta noche en cada discoteca** antes de salir: afluencia, edad media y reparto aproximado del público por género (mujeres, hombres y personas no binarias). Así cada persona puede elegir a dónde ir según el ambiente que busca: más mujeres, mixto o más hombres.
 
 También permite hacer check-in en un local, dejarse ver (si quieres) por la gente que está allí, darse «me gusta», hacer match y chatear en tiempo real.
+
+**Pruébala:** https://pulso-211o.onrender.com (cuenta de prueba **demo@pulso.app / pulso1234**). Está en el plan gratuito de Render: si lleva un rato sin visitas, la primera carga tarda alrededor de un minuto.
 
 Es el proyecto práctico de **dimensionado de servidores y red** de 2.º ASIR: la app es real y la memoria calcula la infraestructura que haría falta para darle servicio en toda España.
 
@@ -15,12 +17,12 @@ Es el proyecto práctico de **dimensionado de servidores y red** de 2.º ASIR: l
 
 ## Privacidad primero
 
-La orientación sexual es un dato especialmente protegido (art. 9 RGPD), y una app que dijera «en este local están estas personas y son gais» podría poner a alguien en peligro. Por eso:
+El ambiente se calcula solo con el género: la app no pide ni guarda la orientación sexual ni ningún otro dato especialmente protegido (art. 9 RGPD). Además:
 
 - **El ambiente es agregado y anónimo.** Con menos de 10 personas en un local no se enseña ningún desglose (k-anonimato). Los grupos de menos de 3 se suman en «Otras» y los porcentajes van de 5 en 5.
-- **Nadie es visible por defecto.** Quien lo activa solo es visto por la gente que está en el mismo local, y su orientación sigue oculta salvo que también lo active.
+- **Nadie es visible por defecto.** Quien lo activa solo es visto por la gente que está en el mismo local, y solo se ve su alias, edad, género y bio.
 - **No se guardan coordenadas.** La ubicación solo se usa para comprobar que estás en el local al hacer check-in. El check-in caduca a las 4 horas.
-- **Solo mayores de 18**, con consentimiento expreso. Desde el perfil se pueden descargar todos los datos o borrar la cuenta.
+- **Solo mayores de 18** y datos mínimos (alias, fecha de nacimiento y género). Desde el perfil se pueden descargar todos los datos o borrar la cuenta.
 
 ## Arquitectura
 
@@ -46,12 +48,27 @@ móvil (PWA) ──► balanceador ──► API Node.js ×N (sin estado) ──
 ```bash
 cd infra
 docker compose up -d --build
-docker compose exec api-1 node src/seed.js   # carga locales y usuarios de prueba
 ```
 
-Abre http://localhost:8080 y entra con **demo@pulso.app / pulso1234**.
+Abre http://localhost:8080 y entra con **demo@pulso.app / pulso1234**. En modo demo los datos de ejemplo se cargan solos al arrancar.
+
+Para enseñar la redundancia en clase, con el laboratorio arrancado y desde `infra` en PowerShell:
+
+```powershell
+.\demo-caida-nodo.ps1
+```
+
+Lanza una prueba de carga contra el balanceador y a mitad apaga de golpe `api-2`. El resultado tiene que salir con **0 errores**.
 
 El laboratorio arranca en **modo demo** (`DEMO_MODE=true`), que permite hacer check-in sin estar físicamente en el local. Para producción hay que ponerlo a `false` y cambiar `JWT_SECRET` y las contraseñas (variables en un fichero `.env` junto al `docker-compose.yml`).
+
+### Demo pública gratuita (Render)
+
+El fichero [`render.yaml`](render.yaml) despliega la app, PostgreSQL y Redis en el plan gratuito de Render con un clic:
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/samiiamnissar-stack/pulso)
+
+La demo arranca en modo demostración: carga locales y usuarios de ejemplo si la base de datos está vacía y renueva sus check-ins cada 15 minutos para que siempre haya ambiente. En el plan gratuito la web se duerme tras 15 minutos sin visitas (la primera carga tarda alrededor de un minuto) y la base de datos gratuita caduca a los 30 días.
 
 ### Sin Docker
 
@@ -68,8 +85,8 @@ Para simular varios nodos sin Docker hay un balanceador sencillo en `server/tool
 
 ```bash
 PORT=3001 NODE_NAME=api-1 npm start
-PORT=3002 NODE_NAME=api-2 RUN_MIGRATIONS=false npm start
-PORT=3003 NODE_NAME=api-3 RUN_MIGRATIONS=false npm start
+PORT=3002 NODE_NAME=api-2 npm start
+PORT=3003 NODE_NAME=api-3 npm start
 npm run lb                        # http://localhost:8080, reparte entre los tres
 ```
 

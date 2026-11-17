@@ -4,3 +4,7 @@ node_modules/
 docs/*.pdf
 docs/__pycache__/
 dump.rdb
+
+# capturas temporales de Packet Tracer
+docs/packet-tracer/*.png
+docs/packet-tracer/captura.ps1
