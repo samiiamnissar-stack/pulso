@@ -1,6 +1,6 @@
 # Pulso · el ambiente de la noche
 
-Pulso es una app móvil (PWA) para saber **qué ambiente hay esta noche en cada discoteca** antes de salir: afluencia, edad media y reparto aproximado del público por orientación y por género. Así cada persona puede elegir a dónde ir según lo que busca, ya sea un sitio LGTBI+, uno mixto o uno mayoritariamente hetero.
+Pulso es una app móvil (PWA) para saber **qué ambiente hay esta noche en cada discoteca** antes de salir: afluencia, edad media y reparto aproximado del público por género (mujeres, hombres y personas no binarias). Así cada persona puede elegir a dónde ir según el ambiente que busca: más mujeres, mixto o más hombres.
 
 También permite hacer check-in en un local, dejarse ver (si quieres) por la gente que está allí, darse «me gusta», hacer match y chatear en tiempo real.
 
@@ -17,12 +17,12 @@ Es el proyecto práctico de **dimensionado de servidores y red** de 2.º ASIR: l
 
 ## Privacidad primero
 
-La orientación sexual es un dato especialmente protegido (art. 9 RGPD), y una app que dijera «en este local están estas personas y son gais» podría poner a alguien en peligro. Por eso:
+El ambiente se calcula solo con el género: la app no pide ni guarda la orientación sexual ni ningún otro dato especialmente protegido (art. 9 RGPD). Además:
 
 - **El ambiente es agregado y anónimo.** Con menos de 10 personas en un local no se enseña ningún desglose (k-anonimato). Los grupos de menos de 3 se suman en «Otras» y los porcentajes van de 5 en 5.
-- **Nadie es visible por defecto.** Quien lo activa solo es visto por la gente que está en el mismo local, y su orientación sigue oculta salvo que también lo active.
+- **Nadie es visible por defecto.** Quien lo activa solo es visto por la gente que está en el mismo local, y solo se ve su alias, edad, género y bio.
 - **No se guardan coordenadas.** La ubicación solo se usa para comprobar que estás en el local al hacer check-in. El check-in caduca a las 4 horas.
-- **Solo mayores de 18**, con consentimiento expreso. Desde el perfil se pueden descargar todos los datos o borrar la cuenta.
+- **Solo mayores de 18** y datos mínimos (alias, fecha de nacimiento y género). Desde el perfil se pueden descargar todos los datos o borrar la cuenta.
 
 ## Arquitectura
 
@@ -114,11 +114,18 @@ Arranca los nodos con `RATE_LIMIT` alto (por ejemplo `RATE_LIMIT=10000000`), por
 
 ## Documentación
 
-- [`docs/Memoria_Dimensionado_Pulso.docx`](docs/Memoria_Dimensionado_Pulso.docx): memoria completa (T1 a T7)
+- [`docs/Documentación_Dimensionado_Pulso_Samia.docx.pdf`](docs/Documentaci%C3%B3n_Dimensionado_Pulso_Samia.docx.pdf): memoria completa (T1 a T7)
 - [`docs/calculos.py`](docs/calculos.py): todos los cálculos de la memoria, para rehacerlos si cambia una hipótesis
 - [`docs/img/esquema-red.svg`](docs/img/esquema-red.svg): esquema de red
+- [`docs/packet-tracer/`](docs/packet-tracer/): topología de la red en Cisco Packet Tracer (`pulso.pkt`), configuración de cada equipo y tabla de cableado y direcciones
 - [`docs/API.md`](docs/API.md): referencia de la API
 - [Presentación para la exposición (Canva)](https://canva.link/8b9dw01vp4hucux)
+
+### Red en Packet Tracer
+
+<p align="center"><img src="docs/img/packet-tracer.png" width="900" alt="Topología de Pulso en Packet Tracer"></p>
+
+Es la red de la memoria a escala: dos operadores, routers de borde y cortafuegos duplicados, dos switches de núcleo con la puerta de enlace compartida (HSRP) y cuatro switches de acceso, uno por zona (DMZ, aplicación, datos y gestión), cada uno conectado a los dos núcleos.
 
 ### Cifras principales (escenario esperado)
 
@@ -138,7 +145,7 @@ Arranca los nodos con `RATE_LIMIT` alto (por ejemplo `RATE_LIMIT=10000000`), por
 server/     API y app (public/)
 infra/      docker-compose, nginx y scripts de replicación de PostgreSQL
 loadtest/   prueba de carga y resultados
-docs/       memoria, cálculos, esquema de red y capturas
+docs/       memoria, cálculos, esquema de red, capturas y topología de Packet Tracer
 ```
 
 ---
